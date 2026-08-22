@@ -1,0 +1,288 @@
+/* =============================================================================
+   ChordPros — chordpros.com
+   One stylesheet for every page. The green here is the app's own default
+   gradient (Theme.swift "green" family), so the site and the app read as the
+   same product.
+   ========================================================================== */
+
+:root {
+  /* The app's green palette, in order. */
+  --g1: #92de83;
+  --g2: #99dea4;
+  --g3: #b2d9a4;
+  --g4: #99dea4;
+
+  --ink:        #14261a;   /* body text on the gradient and in cards */
+  --ink-soft:   #3c5243;   /* secondary text */
+  --card:       #ffffff;
+  --rule:       rgba(20, 38, 26, 0.12);
+
+  --radius-card: 20px;
+  --radius-chip: 12px;
+
+  --shadow-card: 0 1px 2px rgba(20,38,26,.06), 0 12px 32px rgba(20,38,26,.10);
+  --shadow-lift: 0 2px 4px rgba(20,38,26,.08), 0 24px 60px rgba(20,38,26,.16);
+
+  --page:  1100px;
+  --prose: 720px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
+               Helvetica, Arial, sans-serif;
+  /* rem, not px, so a reader who has raised their browser's default font size
+     actually gets it. 1.0625rem is 17px at the usual 16px default. */
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--ink);
+  background-color: var(--g2);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The gradient is a fixed layer behind the page rather than a background on
+   <body>. `background-attachment: fixed` was the obvious way to do it and it
+   is wrong twice over: on a page longer than the viewport the gradient stops
+   painting past the first screenful, and iOS Safari repaints an attached
+   background on every scroll frame. A fixed element has neither problem.
+
+   The app's left-to-right key gradient and nothing else. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(100deg, var(--g1) 0%, var(--g2) 34%, var(--g3) 67%, var(--g4) 100%);
+}
+
+img { max-width: 100%; height: auto; display: block; }
+
+a { color: var(--ink); text-decoration-color: rgba(20,38,26,.35); text-underline-offset: 3px; }
+a:hover { text-decoration-color: var(--ink); }
+
+/* Visible focus, WCAG 2.4.7. The UA default is a thin blue halo that all but
+   disappears on this green, so the ring is drawn in --ink: 9.8:1 against the
+   darkest gradient stop and 15.9:1 on a white card, well past the 3:1 that
+   1.4.11 asks of a non-text indicator. :focus-visible rather than :focus, so
+   a mouse click does not leave a ring behind. */
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Off-screen but still announced and still focusable. Not display:none, which
+   would take it out of the accessibility tree entirely. */
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Bypass blocks, WCAG 2.4.1 — the privacy page runs to about ten thousand
+   pixels, so tabbing past the masthead on every visit is a real cost. Hidden
+   until focused, then it parks itself over the top-left corner. */
+.skip-link {
+  position: absolute;
+  left: 12px; top: 12px;
+  z-index: 10;
+  transform: translateY(-150%);
+  background: var(--ink);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: var(--radius-chip);
+  text-decoration: none;
+  font-weight: 500;
+}
+.skip-link:focus { transform: translateY(0); }
+
+/* <main> carries tabindex="-1" purely so the skip link moves the caret and not
+   just the scroll position. It is not interactive, so ringing the whole region
+   on arrival is noise rather than information. */
+[tabindex="-1"]:focus, [tabindex="-1"]:focus-visible { outline: none; }
+
+h1, h2, h3 { line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 .5em; font-weight: 700; }
+h1 { font-size: clamp(2.4rem, 6vw, 3.6rem); }
+h2 { font-size: clamp(1.35rem, 3vw, 1.7rem); }
+h3 { font-size: 1.05rem; letter-spacing: -0.01em; }
+p  { margin: 0 0 1em; }
+
+.wrap  { width: 100%; max-width: var(--page);  margin: 0 auto; padding: 0 24px; }
+.prose { max-width: var(--prose); }
+
+/* ---------------------------------------------------------------- header -- */
+
+/* Identical markup and identical metrics on every page, so the wordmark lands
+   on exactly the same pixel as you move between them and reads as a fixed
+   piece of furniture rather than something that jumps. The only difference is
+   the tag it sits in: an h1 on the home page, where the product name is the
+   page's subject, and a plain p everywhere else, where the page has a real
+   heading of its own directly underneath. The rules below set size, weight and
+   margin explicitly so both tags render the same. */
+.site-head { padding: 56px 0 0; text-align: center; }
+
+.brand {
+  font-size: clamp(2.4rem, 6vw, 3.6rem);
+  line-height: 1.15; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0;
+}
+.brand a {
+  color: var(--ink); text-decoration: none;
+  /* Inline-block so the hit area is the wordmark itself and not the full
+     centred line box stretching to both gutters. */
+  display: inline-block;
+  transition: opacity .15s ease;
+}
+.brand a:hover { opacity: .72; }
+
+/* ------------------------------------------------------------------ hero -- */
+
+.hero { padding: 20px 0 8px; text-align: center; }
+/* A paragraph, not a tagline. Nobody lands here cold — they have already been
+   sold the idea somewhere else — so this has room to actually explain the app.
+   Wider measure and a smaller size than a one-liner would want: 42ch at
+   1.3rem set three sentences as a tall narrow column. */
+.hero .pitch {
+  font-size: clamp(1.02rem, 1.6vw, 1.15rem);
+  line-height: 1.62;
+  color: var(--ink-soft);
+  /* Ranged left, centred as a block. Centred prose gives every line a
+     different starting x, so the eye has to hunt for the next line's origin —
+     fine for one line, tiring for four. The measure is tightened to 54ch from
+     60 because a ragged right edge needs a shorter line to stay tidy. */
+  text-align: left;
+  max-width: 54ch; margin: 0 auto 36px;
+  text-wrap: pretty;
+}
+
+/* App Store badge. Apple's official artwork is 40px tall at 1x; the wrapper
+   just gives it a hit area and a lift on hover. */
+.badge { display: inline-block; transition: transform .15s ease; }
+.badge:hover { transform: translateY(-1px); }
+.badge img { height: 56px; width: auto; }
+
+/* --------------------------------------------------------------- devices -- */
+
+/* No box-shadow and no border-radius here, deliberately. Both PNGs are
+   cropped tight to the device with only a pixel or two of antialiasing, so a
+   CSS shadow traced the rectangular bounding box rather than the rounded
+   silhouette and left a hard-edged halo out in the corners. The frames bring
+   their own corners; any shadow has to be baked into the artwork. */
+
+/* The pair is composed as a single unit so it scales uniformly and the two
+   devices hold a true relative size at every width. Real hardware: the
+   iPhone 17 Pro is 150.0mm tall, the 11-inch iPad Pro 249.7mm, so the iPad
+   has to render 1.665x taller. The shares below are fractions of --pair and
+   sum to exactly 1 (.752 + .309 - .061 of overlap), which is what keeps the
+   composition centred no matter how wide it gets. */
+.devices {
+  --pair: min(665px, 94vw);
+  padding: 56px 0 72px;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.device img { display: block; }
+
+/* Phone sits in front of the iPad's bottom-left corner. It precedes the iPad
+   in the DOM, so it needs the z-index to win the overlap. */
+.device--phone {
+  position: relative; z-index: 1;
+  margin-right: calc(var(--pair) * -.061);
+}
+.device--phone img  { width: calc(var(--pair) * .309); }
+.device--tablet img { width: calc(var(--pair) * .752); }
+
+/* ----------------------------------------------------------------- cards -- */
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: clamp(24px, 5vw, 44px);
+}
+
+/* Long-form legal pages. */
+.doc { padding: 20px 0 72px; }
+.doc .card + .card { margin-top: 20px; }
+
+/* Deliberately much smaller than the wordmark above it. This is the page's
+   real h1, but visually it is a subtitle hanging off the brand, so the two
+   are centred together as one block before the prose goes back to ranged
+   left inside the card. */
+.doc-title {
+  font-size: clamp(1.3rem, 3.2vw, 1.75rem);
+  color: var(--ink-soft);
+  text-align: center;
+  margin: .35em 0 .5em;
+}
+.doc .updated {
+  color: var(--ink-soft); font-size: .95rem;
+  text-align: center; margin-bottom: 2.4em;
+}
+.doc h2 { margin-top: 1.8em; }
+.doc h2:first-of-type { margin-top: 0; }
+.doc ul { padding-left: 1.2em; margin: 0 0 1em; }
+.doc li { margin-bottom: .4em; }
+.doc .lede { font-size: 1.1rem; }
+
+.callout {
+  background: rgba(146, 222, 131, .22);
+  border-left: 3px solid var(--g1);
+  border-radius: var(--radius-chip);
+  padding: 16px 20px;
+  margin: 0 0 1.5em;
+}
+.callout p:last-child { margin-bottom: 0; }
+
+/* ---------------------------------------------------------------- footer -- */
+
+.site-foot {
+  border-top: 1px solid var(--rule);
+  padding: 32px 0 48px;
+  font-size: .93rem;
+  color: var(--ink-soft);
+}
+.site-foot .wrap {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+}
+.site-foot nav { display: flex; gap: 24px; flex-wrap: wrap; }
+/* Underlined for the same reason as the masthead nav — and here the
+   neighbouring copyright line is literally the same colour. */
+.site-foot a { color: var(--ink-soft); text-decoration: underline; }
+.site-foot a:hover { color: var(--ink); }
+
+/* Sends the reader off-site — worth saying so before they tap. */
+.external::after {
+  content: "↗"; font-size: .8em; margin-left: 4px; opacity: .7;
+}
+
+@media (max-width: 640px) {
+  .site-head { padding-top: 36px; }
+  .devices { padding: 40px 0 56px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .badge { transition: none; }
+}
+
+/* Target Size (Minimum), WCAG 2.2 SC 2.5.8 — 24x24 CSS px.
+   These nav links landed at 23-24px tall from line-height alone, right on the
+   line. inline-block plus vertical padding grows the hit area without moving
+   anything visually; the flex gaps already keep neighbouring targets apart.
+   The links inside policy prose are exempt under the inline exception. */
+.site-foot nav a,
+.site-foot a {
+  display: inline-block;
+  padding: 4px 0;
+}
